@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+dhronfinetune/
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model weights / large files
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Dataset / outputs (if any)
+data/
+outputs/
+runs/
