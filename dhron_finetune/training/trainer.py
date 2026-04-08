@@ -20,12 +20,11 @@ def train_model(
 
     use_cuda = torch.cuda.is_available()
 
+    # 🔥 KEY FIX: QLoRA MUST NOT USE FP16 AMP
     if qlora:
-        fp16 = False
-        bf16 = use_cuda
+        use_fp16 = False
     else:
-        fp16 = use_cuda
-        bf16 = False
+        use_fp16 = use_cuda
 
     training_args = TrainingArguments(
         output_dir=output_dir,
@@ -34,17 +33,20 @@ def train_model(
         learning_rate=lr,
         logging_steps=5,
         save_steps=50,
-        fp16=fp16,
-        bf16=bf16,
 
-        # 🔥 disable problematic scaler behavior
+        # 🔥 PRECISION CONTROL
+        fp16=use_fp16,
+        bf16=False,
+
+        # 🔥 DISABLE AMP SCALER ISSUES
         optim="adamw_torch",
 
+        # 🔥 IMPORTANT STABILITY FIX
         gradient_accumulation_steps=1,
         max_grad_norm=1.0,
 
-        # 🔥 prevents AMP crash
-        fp16_full_eval=False,
+        # 🔥 CRITICAL FOR QLoRA
+        torch_compile=False,
 
         report_to="none",
     )
