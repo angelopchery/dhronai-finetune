@@ -96,7 +96,11 @@ def preprocess(
 
             processed.append(formatted)
 
-    output_file.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        console.print(f"[red][ERROR] Permission denied: cannot create directory {output_file.parent}[/red]")
+        raise typer.Exit(code=1)
 
     with open(output_file, "w", encoding="utf-8") as f:
         # 🔥 dataset marker
@@ -107,6 +111,12 @@ def preprocess(
 
         for row in processed:
             f.write(json.dumps(row) + "\n")
+
+    # Validate we have at least some samples
+    if not processed:
+        console.print("[red][ERROR] No valid samples found in the input file.[/red]")
+        console.print("[yellow]Please check your dataset format and content.[/yellow]")
+        raise typer.Exit(code=1)
 
     console.print("[green]✅ Preprocessing complete[/green]")
 

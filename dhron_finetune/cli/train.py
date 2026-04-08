@@ -1,3 +1,4 @@
+import os
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -35,6 +36,16 @@ def train(
 ):
     console.print("🚀 Starting training pipeline...")
 
+    # Validate dataset file exists
+    if not os.path.exists(data_path):
+        console.print(f"[red][ERROR] Dataset file not found: {data_path}[/red]")
+        console.print("[yellow]Please provide a valid path to a preprocessed dataset file.[/yellow]")
+        raise typer.Exit(code=1)
+
+    if not os.path.isfile(data_path):
+        console.print(f"[red][ERROR] Path is not a file: {data_path}[/red]")
+        raise typer.Exit(code=1)
+
     # ---------------- PREPROCESS CHECK ----------------
     if not is_preprocessed(data_path):
         console.print("[red]Dataset not preprocessed![/red]")
@@ -67,7 +78,17 @@ def train(
     console.print(table)
 
     # ---------------- MODEL SELECTION ----------------
-    choice = int(typer.prompt("Select model index"))
+    # Model selection with validation
+    while True:
+        try:
+            choice = typer.prompt("Select model index", type=int)
+            if choice < 0 or choice >= len(MODEL_REGISTRY):
+                console.print(f"[red]Please enter a number between 0 and {len(MODEL_REGISTRY) - 1}[/red]")
+                continue
+            break
+        except ValueError:
+            console.print("[red]Please enter a valid number[/red]")
+
     selected_model_info = MODEL_REGISTRY[choice]
 
     # 🔥 HARD BLOCK (VERY IMPORTANT)
@@ -78,11 +99,13 @@ def train(
 
     selected_model = selected_model_info["name"]
 
-    console.print(f"\n📦 Loading model: {selected_model}")
-
-    model, tokenizer = load_model(selected_model, hw["device"], qlora=qlora)
-
-    console.print("[green]✅ Model loaded successfully[/green]")
+    try:
+        console.print(f"\n📦 Loading model: {selected_model}")
+        model, tokenizer = load_model(selected_model, hw["device"], qlora=qlora)
+        console.print("[green]✅ Model loaded successfully[/green]")
+    except Exception as e:
+        console.print(f"[red][ERROR] Failed to load model: {str(e)}[/red]")
+        raise typer.Exit(code=1)
 
     # ---------------- DATASET ----------------
     console.print("\n📊 Preparing dataset...")
@@ -92,6 +115,11 @@ def train(
     # GPU-friendly sampling
     MAX_SAMPLES = 1000
     dataset = dataset.select(range(min(len(dataset), MAX_SAMPLES)))
+
+    if len(dataset) == 0:
+        console.print("[red][ERROR] Dataset is empty after preprocessing.[/red]")
+        console.print("[yellow]Please ensure your dataset contains valid samples.[/yellow]")
+        raise typer.Exit(code=1)
 
     dataset = dataset.map(format_prompt)
 

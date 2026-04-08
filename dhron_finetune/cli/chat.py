@@ -1,3 +1,4 @@
+import os
 import time
 import typer
 from rich.console import Console
@@ -77,6 +78,16 @@ def chat(
 
     hw = get_device_info()
     device = hw["device"]
+
+    # Validate model path exists
+    if not os.path.exists(model):
+        console.print(f"[red][ERROR] Model path not found: {model}[/red]")
+        console.print("[yellow]Please provide a valid local path to a trained model directory.[/yellow]")
+        raise typer.Exit(code=1)
+
+    if not os.path.isdir(model):
+        console.print(f"[red][ERROR] Path is not a directory: {model}[/red]")
+        raise typer.Exit(code=1)
 
     # Loading (this stays OUTSIDE panel for clean UX)
     with console.status("[bold green]⏳ Loading model + adapter...[/bold green]"):

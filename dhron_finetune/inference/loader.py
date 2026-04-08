@@ -1,12 +1,24 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 import torch
+import os
 
 
 def load_model_with_adapter(model_path: str, device: str):
     """
     Load base model + LoRA adapter safely
     """
+
+    # Explicit check: prevent HuggingFace from attempting remote download
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(
+            f"[ERROR] Model path not found: {model_path}. "
+            f"Please provide a valid local path."
+        )
+    if not os.path.isdir(model_path):
+        raise NotADirectoryError(
+            f"[ERROR] Path is not a directory: {model_path}"
+        )
 
     # Load tokenizer from the saved model path
     tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -29,4 +41,10 @@ def load_model_with_adapter(model_path: str, device: str):
 
     model.eval()
 
-    return model, tokenizer
+    try:
+        return model, tokenizer
+    except Exception as e:
+        raise RuntimeError(
+            f"[ERROR] Failed to load model from {model_path}. "
+            f"Details: {str(e)}"
+        )
