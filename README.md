@@ -17,6 +17,12 @@ pip install "dhronai[gpu]"
 
 GPU mode enables faster training and QLoRA (4-bit quantization).
 
+
+
+## Demo
+
+![Dhron AI Demo](assets/image.png)
+
 🧠 Features
 CLI-based workflow using Typer + Rich
 LoRA fine-tuning support
