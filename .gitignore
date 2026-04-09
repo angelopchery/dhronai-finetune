@@ -32,3 +32,24 @@ Thumbs.db
 data/
 outputs/
 runs/
+
+# Build artifacts
+build/
+dist/
+dist_installer/
+
+# Installer
+installer/
+
+# Python packaging
+*.egg-info/
+
+# Virtual env
+dhronfinetune/
+.venv/
+
+# Misc
+*.log
+.env
+
+.claude/
