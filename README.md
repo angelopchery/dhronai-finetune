@@ -21,7 +21,10 @@ GPU mode enables faster training and QLoRA (4-bit quantization).
 
 ## Demo
 
-![Dhron AI Demo](assets/image.png)
+<p align="center">
+  <img src="assets/image.png" width="700"/>
+</p>
+
 
 🧠 Features
 CLI-based workflow using Typer + Rich
